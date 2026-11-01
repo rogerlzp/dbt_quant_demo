@@ -170,7 +170,7 @@ The three together tell one story: **compute (pandas) → transform (dbt) → se
 
 ## License
 
-MIT
+MIT — see [LICENSE](LICENSE).
 
 ---
 
