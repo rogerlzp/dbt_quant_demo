@@ -1,0 +1,43 @@
+# dbt project: dbt_quant_demo
+# 演示一个"量化研究数据平台"的 transformation layer
+# 用 DuckDB 作为 warehouse —— 零成本、零外部依赖，可复现
+
+name: 'dbt_quant_demo'
+version: '1.0.0'
+config-version: 2
+
+profile: 'dbt_quant_demo'
+
+model-paths: ["models"]
+seed-paths: ["seeds"]
+test-paths: ["tests"]
+macro-paths: ["macros"]
+
+target-path: "target"
+clean-targets:
+  - "target"
+  - "dbt_packages"
+
+vars:
+  # 因子计算窗口（复用 panda_factor 的算子语义）
+  ma_window: 20
+  rank_window: 60
+  # 数据质量阈值：单日因子覆盖率的告警线
+  min_coverage_ratio: 0.8
+
+models:
+  dbt_quant_demo:
+    +materialized: view
+    staging:
+      +materialized: view
+      +tags: ['staging']
+    intermediate:
+      +materialized: view
+      +tags: ['intermediate']
+    marts:
+      +materialized: table
+      +tags: ['marts', 'analytics-engineering']
+
+seeds:
+  dbt_quant_demo:
+    +schema: raw

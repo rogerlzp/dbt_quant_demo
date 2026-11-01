@@ -1,0 +1,34 @@
+version: 2
+
+seeds:
+  - name: stock_daily_seed
+    description: "原始行情数据（模拟生产 stock_daily 表结构：日频 OHLCV + 成交额 + 主力净流入）"
+    columns:
+      - name: trade_date
+        description: "交易日"
+        tests:
+          - not_null
+      - name: symbol
+        description: "证券代码，含交易所后缀"
+        tests:
+          - not_null
+    config:
+      column_types:
+        trade_date: date
+        volume: bigint
+        amount: bigint
+
+  - name: factor_values_seed
+    description: "因子库产出的横截面因子值（模拟生产 factor_values 表：每日每标的每因子一行）"
+    columns:
+      - name: trade_date
+        description: "因子计算日"
+        tests:
+          - not_null
+      - name: symbol
+        description: "证券代码"
+        tests:
+          - not_null
+    config:
+      column_types:
+        trade_date: date

@@ -1,0 +1,6 @@
+# ③ 综合评分必须严格落在 [0,1]，分组必须落在 [1,5]（语义层指标的自洽性）
+- name: assert_composite_score_bounds
+  description: "composite_score 必须 ∈ [0,1]，且 score_bucket ∈ [1,5]"
+  tests:
+    - dbt_utils.expression_is_true:
+        expression: "composite_score >= 0 and composite_score <= 1 and score_bucket between 1 and 5"

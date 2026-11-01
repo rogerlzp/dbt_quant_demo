@@ -1,0 +1,16 @@
+# dbt profile: dbt_quant_demo
+# DuckDB —— 本地文件型 warehouse，零成本零依赖，适合 demo 与 CI
+dbt_quant_demo:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      path: "{{ env_var('DBT_DUCKDB_PATH', 'quant_demo.duckdb') }}"
+      threads: 4
+      extensions:
+        - httpfs
+        - json
+    prod:
+      type: duckdb
+      path: "{{ env_var('DBT_DUCKDB_PATH_PROD', 'quant_prod.duckdb') }}"
+      threads: 8

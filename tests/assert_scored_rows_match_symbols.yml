@@ -1,0 +1,6 @@
+# ② 被打分的标的数必须等于当日行情标的数（防止 join 静默丢行）
+- name: assert_scored_rows_match_symbols
+  description: "被打分的标的数必须等于当日行情标的数（防止 join 丢行）"
+  tests:
+    - dbt_utils.expression_is_true:
+        expression: "scored_rows = symbols_present"

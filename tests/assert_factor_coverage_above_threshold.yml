@@ -1,0 +1,10 @@
+# 单例测试（singular test）：跨行断言业务不变量
+#
+# ① 因子覆盖率不得低于阈值
+#    对应生产里的「新鲜度/覆盖度检查告警而非静默失败」
+- name: assert_factor_coverage_above_threshold
+  description: "任一交易日的因子覆盖率必须 >= var('min_coverage_ratio')"
+  tests:
+    - dbt_utils.accepted_range:
+        min_value: "{{ var('min_coverage_ratio') }}"
+        inclusive: true

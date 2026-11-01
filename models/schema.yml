@@ -1,0 +1,109 @@
+# dbt schema —— 全部模型的唯一权威描述
+# 拆成多个 schema 文件会导致 dbt 报「同一资源被描述两次」，所以统一放这里
+version: 2
+models:
+- name: stg_stock_daily
+  description: 清洗后的日频行情。职责：重命名 / 类型转换 / 去重 / 显式过滤，不含业务逻辑。
+  tests:
+  - unique_combination_of_columns:
+      combination_of_columns:
+      - trade_date
+      - symbol
+  columns:
+  - name: trade_date
+    description: 交易日
+    tests:
+    - not_null
+  - name: symbol
+    description: 证券代码（大写规范化）
+    tests:
+    - not_null
+  - name: close_price
+    description: 收盘价
+    tests:
+    - not_null
+    - positive_values
+  - name: intraday_range
+    description: 日内振幅 = (high - low) / low
+- name: stg_factor_values
+  description: 清洗后的因子值。职责同上。
+  tests:
+  - unique_combination_of_columns:
+      combination_of_columns:
+      - trade_date
+      - symbol
+  columns:
+  - name: trade_date
+    description: 因子计算日
+    tests:
+    - not_null
+  - name: symbol
+    description: 证券代码
+    tests:
+    - not_null
+- name: int_daily_factor_panel
+  description: 行情 + 因子对齐后的日频面板，含窗口指标（MA / 年化波动率 / 日收益）。
+  tests:
+  - unique_combination_of_columns:
+      combination_of_columns:
+      - trade_date
+      - symbol
+  columns:
+  - name: trade_date
+    description: 交易日
+    tests:
+    - not_null
+  - name: symbol
+    description: 证券代码
+    tests:
+    - not_null
+  - name: volatility_annualized
+    description: 年化波动率 = stddev(close)/avg(close) * sqrt(252)
+- name: factor_score_daily
+  description: 投研消费层宽表：含横截面分位排名、综合评分（动量40%+价值30%+资金流30%）与 5 档分组。
+  tests:
+  - unique_combination_of_columns:
+      combination_of_columns:
+      - trade_date
+      - symbol
+  columns:
+  - name: trade_date
+    description: 交易日
+    tests:
+    - not_null
+  - name: symbol
+    description: 证券代码
+    tests:
+    - not_null
+  - name: composite_score
+    description: 综合评分 ∈ [0,1]，权重：动量 0.4 / 价值 0.3 / 资金流 0.3
+    tests:
+    - not_null
+    - ratio_between:
+        min_value: 0.0
+        max_value: 1.0
+  - name: score_bucket
+    description: 按综合评分分 5 档（1=最差，5=最好）
+    tests:
+    - accepted_values:
+        values:
+        - 1
+        - 2
+        - 3
+        - 4
+        - 5
+- name: data_quality_daily
+  description: 数据质量日表：因子/价格/资金流缺失数与覆盖率。用于数据质量门（缺口告警而非静默失败）。
+  columns:
+  - name: trade_date
+    description: 交易日
+    tests:
+    - not_null
+    - unique
+  - name: factor_coverage_ratio
+    description: 因子覆盖率 = 1 - 缺失因子行/标的数
+    tests:
+    - not_null
+    - ratio_between:
+        min_value: 0.0
+        max_value: 1.0
